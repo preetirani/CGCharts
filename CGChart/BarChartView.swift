@@ -90,32 +90,75 @@ extension BarChartView {
 }
 
 extension BarChartView {
-    private func drawBars(context: CGContext, data: [BarEntry]) {
-        data.forEach{ drawBar(context: context, data: $0)}
-    }
+//    private func drawBar(context: CGContext, data: BarEntry) {
+//        let xAxisLength = xMax - xMin
+//        let yAxisLength = yMax - yMin
+//        let width = bounds.width
+//        let height = bounds.height
+//
+//        let topMargin = height * 0.10
+//        let bottomMargin = height * 0.10
+//        let leftMargin = width * 0.10
+//        let rightMargin = width * 0.10
+//
+//        let x = data.x * (width / xAxisLength)
+//        let ymin = data.yMin * (height / yAxisLength)
+//        let ymax = data.yMax * (height / yAxisLength)
+//
+//        let barHeight = ymax - ymin
+//        let barWidth = identicalBars ? self.barWidth : data.barWidth
+//        let radius = barWidth / 2
+//
+//        let path = UIBezierPath(roundedRect: CGRect(x: x, y: ymin, width: barWidth, height: barHeight), cornerRadius: radius)
+//        context.setFillColor(identicalBars ? barColor.cgColor : data.color.cgColor)
+//        context.addPath(path.cgPath)
+//        context.fillPath()
+//    }
     
-    private func drawBar(context: CGContext, data: BarEntry) {
+    private func drawBars(context: CGContext, data: [BarEntry]) {
         let xAxisLength = xMax - xMin
         let yAxisLength = yMax - yMin
-        let width = bounds.width
-        let height = bounds.height
+        var width = bounds.width
+        var height = bounds.height
         
-        let topMargin = height * 0.10
-        let bottomMargin = height * 0.10
-        let leftMargin = width * 0.10
-        let rightMargin = width * 0.10
+        let topMargin = margins.Top / xAxisLength
+        let bottomMargin = margins.Bottom / xAxisLength
+        let leftMargin = margins.Leading / xAxisLength
+        let rightMargin = margins.Trailing / xAxisLength
         
-        let x = data.x * (width / xAxisLength)
-        let ymin = data.yMin * (height / yAxisLength)
-        let ymax = data.yMax * (height / yAxisLength)
+        let xMaxRelativeWidth: CGFloat = xMax * (width / xAxisLength) + barWidth
+        let adjustBarSpace = xMaxRelativeWidth - width
         
-        let barHeight = ymax - ymin
-        let barWidth = identicalBars ? self.barWidth : data.barWidth
-        let radius = barWidth / 2
+        func drawBar(data: BarEntry) {
+            context.saveGState()
+            var x = data.x * (width / xAxisLength) - margins.Leading //- margins.Leading
+            if xMaxRelativeWidth > width {
+                x -= adjustBarSpace
+            }
+            
+            if x < 0 {
+                x = 0
+            }
+            
+            let ymin = data.yMin * (height / yAxisLength) + topMargin
+            let ymax = data.yMax * (height / yAxisLength) - bottomMargin
+            
+            var barHeight = ymax - ymin
+            let barWidth = identicalBars ? self.barWidth : data.barWidth
+            let radius = barWidth / 2
+            
+            if barHeight <= 0 {
+                barHeight = barWidth
+            }
+            
+            let path = UIBezierPath(roundedRect: CGRect(x: x, y: ymin, width: barWidth, height: barHeight), cornerRadius: radius)
+            context.setFillColor(identicalBars ? barColor.cgColor : data.color.cgColor)
+            context.addPath(path.cgPath)
+            context.fillPath()
+            context.restoreGState()
+        }
         
-        let path = UIBezierPath(roundedRect: CGRect(x: x, y: ymin, width: barWidth, height: barHeight), cornerRadius: radius)
-        context.setFillColor(identicalBars ? barColor.cgColor : data.color.cgColor)
-        context.addPath(path.cgPath)
-        context.fillPath()
+        data.forEach{ drawBar(data: $0)}
+        
     }
 }

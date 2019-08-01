@@ -35,7 +35,7 @@ class ViewController: UIViewController {
         barChartView.margins = (10,10,10,10)
         let gridData = GridData(horizontalPartitions: 10, verticalPartitions: 10)
         let barData = [entry1, entry2, entry3, entry4, entry5, entry6, entry7, entry8, entry9, entry10]
-        barChartView.draw(barEntrySet: [], gridData: gridData)
+        barChartView.draw(barEntrySet: barData, gridData: gridData)
     }
     
     
